@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { CorridorStatusMap, FxRateTicker, FxComparisonTable, FiatOnRampModal, type RemittanceCorridor } from "@/components/remittance";
+import { CorridorStatusMap, FxRateTicker, FxComparisonTable, FiatOnRampModal, SEP24InteractiveModal, type RemittanceCorridor } from "@/components/remittance";
 import { useOptionalWallet, useOptionalWalletActions } from "@/app/components/providers/WalletProvider";
-import { CreditCard, Wallet } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, CreditCard } from "lucide-react";
+import type { SEP24Operation } from "@/lib/sep24Interactive";
 
 export default function RemittancePage() {
   const walletState = useOptionalWallet();
   const walletActions = useOptionalWalletActions();
   const wallet = walletState?.wallet;
   const [isOnRampOpen, setIsOnRampOpen] = useState(false);
+  const [isSEP24Open, setIsSEP24Open] = useState(false);
+  const [sep24Operation, setSEP24Operation] = useState<SEP24Operation>("deposit");
   const [selectedCorridor, setSelectedCorridor] = useState<RemittanceCorridor | null>(null);
 
   const walletAddress = wallet?.publicKey || "";
@@ -27,20 +30,42 @@ export default function RemittancePage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            if (!walletAddress) {
-              alert("Please connect your Stellar wallet first to fund your account.");
-              return;
-            }
-            setIsOnRampOpen(true);
-          }}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-medium text-sm shadow-lg shadow-blue-500/20 transition-all active:scale-95 shrink-0"
-        >
-          <CreditCard size={18} />
-          <span>Fund Account / Buy Crypto</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (!walletAddress) {
+                alert("Please connect your Stellar wallet first to fund your account.");
+                return;
+              }
+              setIsOnRampOpen(true);
+            }}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-4 text-sm font-medium text-white shadow-lg shadow-blue-500/20 transition-all hover:from-blue-500 hover:to-violet-500 active:scale-95"
+          >
+            <CreditCard size={18} />
+            <span>Fund Account</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSEP24Operation("deposit");
+              setIsSEP24Open(true);
+            }}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-lime-300/25 bg-lime-300/[0.07] px-4 text-sm font-medium text-lime-200 transition-colors hover:bg-lime-300/15"
+          >
+            <ArrowDownToLine size={17} /> SEP-24 Deposit
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSEP24Operation("withdrawal");
+              setIsSEP24Open(true);
+            }}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/5"
+          >
+            <ArrowUpFromLine size={17} /> SEP-24 Withdraw
+          </button>
+        </div>
       </div>
 
       {selectedCorridor && (
@@ -74,6 +99,16 @@ export default function RemittancePage() {
           }}
         />
       )}
+      <SEP24InteractiveModal
+        isOpen={isSEP24Open}
+        onClose={() => setIsSEP24Open(false)}
+        account={walletAddress}
+        assetCode="XLM"
+        initialOperation={sep24Operation}
+        onRefresh={async () => {
+          await walletActions?.refreshWalletState();
+        }}
+      />
     </div>
   );
 }

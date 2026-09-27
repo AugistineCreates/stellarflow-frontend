@@ -15,6 +15,8 @@ import { OfflineBanner } from "./components/OfflineBanner";
 import { SwUpdateBanner } from "@/components/pwa/SwUpdateBanner";
 import { ScreenLockProvider } from "@/components/security/ScreenLockModal";
 import { SessionTimeoutManager } from "@/components/security/SessionTimeoutManager";
+import { InactivityLockGuard } from "@/components/security/InactivityLockGuard";
+import { CspReporterInit } from "@/components/security/CspReporterInit";
 import { WalletSessionProvider } from "@/context/WalletContext";
 import { GasFeeProvider } from "@/components/gas-fee";
 import { headers } from "next/headers";
@@ -125,6 +127,7 @@ export default async function RootLayout({
         className="antialiased font-sans flex flex-col min-h-screen"
       >
         <OfflineBanner />
+        <CspReporterInit />
         <SvgSprite />
         <div className="fixed top-3 right-3 z-40">
           <SecurityBanner />
@@ -147,7 +150,9 @@ export default async function RootLayout({
                           <ErrorBoundary tags={{ section: "root" }}>
                             <WalletSessionProvider>
                               <SessionTimeoutManager>
-                                <ScreenLockProvider>{children}</ScreenLockProvider>
+                                <ScreenLockProvider>
+                                  <InactivityLockGuard>{children}</InactivityLockGuard>
+                                </ScreenLockProvider>
                               </SessionTimeoutManager>
                             </WalletSessionProvider>
                           </ErrorBoundary>

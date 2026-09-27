@@ -3,13 +3,16 @@
 import React, { useState } from "react";
 import { CorridorStatusMap, FxRateTicker, FxComparisonTable, FiatOnRampModal, type RemittanceCorridor } from "@/components/remittance";
 import { useOptionalWallet, useOptionalWalletActions } from "@/app/components/providers/WalletProvider";
-import { CreditCard, Wallet } from "lucide-react";
+import { CreditCard, LockKeyhole, ShieldAlert } from "lucide-react";
+import { ShieldedDepositModal } from "@/components/remittance/ShieldedDepositModal";
+import { RedeemNoteForm } from "@/components/remittance/RedeemNoteForm";
 
 export default function RemittancePage() {
   const walletState = useOptionalWallet();
   const walletActions = useOptionalWalletActions();
   const wallet = walletState?.wallet;
   const [isOnRampOpen, setIsOnRampOpen] = useState(false);
+  const [isShieldedDepositOpen, setIsShieldedDepositOpen] = useState(false);
   const [selectedCorridor, setSelectedCorridor] = useState<RemittanceCorridor | null>(null);
 
   const walletAddress = wallet?.publicKey || "";
@@ -63,6 +66,54 @@ export default function RemittancePage() {
         </div>
       </div>
 
+      <section aria-labelledby="private-remittance-title" className="mt-12 space-y-5">
+        <header className="flex flex-col justify-between gap-4 border-b border-neutral-800 pb-5 lg:flex-row lg:items-end">
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-lime-300">Privacy tools</p>
+            <h2 id="private-remittance-title" className="text-2xl font-semibold tracking-tight text-white">
+              Shielded remittance
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-400">
+              Create and verify a private recovery note on this device. A checksum protects note integrity; a live ZK prover and shielded pool are required to move funds privately.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs font-medium">
+            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-3 text-neutral-300">
+              <ShieldAlert size={14} /> Public transfer · network-visible
+            </span>
+            <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-amber-300/25 bg-amber-300/[0.06] px-3 text-amber-200">
+              <LockKeyhole size={14} /> Shielded pool · not connected
+            </span>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+          <div className="flex flex-col items-start rounded-xl border border-white/10 bg-[#101713] p-5 text-white sm:p-6">
+            <div className="mb-4 flex w-full items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-lime-300">Deposit</p>
+                <h3 className="mt-1 text-lg font-semibold">Create a recovery note</h3>
+              </div>
+              <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2.5 py-1 text-xs text-amber-200">
+                Local note only
+              </span>
+            </div>
+            <p className="mb-5 max-w-lg text-sm leading-relaxed text-white/60">
+              Generate a random secret and its commitment, then keep an encrypted or offline backup. This does not deposit XLM or create a zero-knowledge proof.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsShieldedDepositOpen(true)}
+              className="mt-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-lime-300 px-4 text-sm font-semibold text-neutral-950 transition-colors hover:bg-lime-200"
+            >
+              <LockKeyhole size={17} /> Create deposit note
+            </button>
+          </div>
+
+          <RedeemNoteForm />
+        </div>
+      </section>
+
       {isOnRampOpen && walletAddress && (
         <FiatOnRampModal
           isOpen={isOnRampOpen}
@@ -74,6 +125,10 @@ export default function RemittancePage() {
           }}
         />
       )}
+      <ShieldedDepositModal
+        isOpen={isShieldedDepositOpen}
+        onClose={() => setIsShieldedDepositOpen(false)}
+      />
     </div>
   );
 }

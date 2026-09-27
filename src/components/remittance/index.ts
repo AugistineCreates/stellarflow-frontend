@@ -31,3 +31,4 @@ export {
   default as FeeSavingsWidget,
   type FeeSavingsWidgetProps,
 } from "./FeeSavingsWidget";
+export { default as SEP38QuoteErrorView, type SEP38QuoteErrorViewProps } from "./SEP38QuoteErrorView";

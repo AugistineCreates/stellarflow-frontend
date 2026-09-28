@@ -25,6 +25,7 @@ import { HapticProvider } from "@/components/providers/HapticProvider";
 import { PushNotificationRoot } from "@/components/notifications";
 import { RpcFailoverMonitor } from "./components/providers/RpcFailoverMonitor";
 import { CommandPalette } from "@/components/command-palette";
+import { BalancePrivacyProvider } from "@/context/BalancePrivacyContext";
 
 export const metadata: Metadata = {
   title: "StellarFlow Network Dashboard",
@@ -151,7 +152,9 @@ export default async function RootLayout({
                             <WalletSessionProvider>
                               <SessionTimeoutManager>
                                 <ScreenLockProvider>
-                                  <InactivityLockGuard>{children}</InactivityLockGuard>
+                                  <BalancePrivacyProvider>
+                                    <InactivityLockGuard>{children}</InactivityLockGuard>
+                                  </BalancePrivacyProvider>
                                 </ScreenLockProvider>
                               </SessionTimeoutManager>
                             </WalletSessionProvider>

@@ -153,7 +153,10 @@ export default async function RootLayout({
                             <WalletSessionProvider>
                               <SessionTimeoutManager>
                                 <ScreenLockProvider>
-                                  <InactivityLockGuard>{children}</InactivityLockGuard>
+                                    <InactivityLockGuard>
+                                      {children}
+                                      <MobileBottomNav />
+                                    </InactivityLockGuard>
                                 </ScreenLockProvider>
                               </SessionTimeoutManager>
                             </WalletSessionProvider>
